@@ -8,10 +8,10 @@ const server = app.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`);
 });
 
-const shutdown = async (signal) => {
+const shutdown = (signal) => {
   console.log(`\n${signal} received. Shutting down...`);
-  server.close(async () => {
-    await closeDB();
+  server.close(() => {
+    closeDB();
     process.exit(0);
   });
   setTimeout(() => process.exit(1), 10000);
