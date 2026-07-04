@@ -15,12 +15,10 @@ async function connectWithRetry(retries = MAX_RETRIES) {
       if (attempt < retries) {
         console.log(`Retrying in ${RETRY_DELAY_MS / 1000}s...`);
         await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-      } else {
-        console.error('All MongoDB connection attempts failed. Exiting.');
-        process.exit(1);
       }
     }
   }
+  console.error('All MongoDB connection attempts failed. Server will start without DB.');
 }
 
 mongoose.connection.on('error', (err) => {

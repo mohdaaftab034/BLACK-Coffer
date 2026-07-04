@@ -13,6 +13,10 @@ app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.get('/', (_req, res) => {
+  res.json({ name: 'Blackcoffer Dashboard API', version: '1.0.0' });
+});
+
 app.get('/api/health', (_req, res) => {
   const mongoose = require('mongoose');
   const dbState = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
