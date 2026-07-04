@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -40,10 +41,14 @@ app.use('/api/insights', insightRoutes);
 
 if (config.isProduction) {
   const frontendDist = path.resolve(__dirname, '../../frontend/dist');
-  app.use(express.static(frontendDist));
-  app.get(/^\/(?!api).*/, (_req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
-  });
+  if (fs.existsSync(frontendDist)) {
+    app.use(express.static(frontendDist));
+    app.get(/^\/(?!api).*/, (_req, res) => {
+      res.sendFile(path.join(frontendDist, 'index.html'));
+    });
+  } else {
+    console.warn(`Frontend dist not found at ${frontendDist}. API-only mode.`);
+  }
 }
 
 app.use((_req, res) => {
