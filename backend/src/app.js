@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,7 +11,10 @@ const errorHandler = require('./middlewares/errorHandler');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: config.corsOrigin }));
+const corsOptions = config.isProduction
+  ? { origin: config.corsOrigin === '*' ? true : config.corsOrigin.split(',').map(s => s.trim()) }
+  : { origin: config.corsOrigin };
+app.use(cors(corsOptions));
 app.use(express.json());
 
 if (!config.isProduction) {
@@ -33,6 +37,14 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/insights', insightRoutes);
+
+if (config.isProduction) {
+  const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+  app.use(express.static(frontendDist));
+  app.get(/^\/(?!api).*/, (_req, res) => {
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });

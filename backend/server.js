@@ -7,7 +7,7 @@ async function start() {
 
   const server = app.listen(config.port, () => {
     console.log(`Server running in ${config.nodeEnv} mode on port ${config.port}`);
-    console.log(`CORS origin: ${config.corsOrigin}`);
+    if (config.corsOrigin) console.log(`CORS origin: ${config.corsOrigin}`);
   });
 
   const shutdown = async (signal) => {
