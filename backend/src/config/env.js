@@ -15,7 +15,7 @@ const config = Object.freeze({
   port: parseInt(process.env.PORT, 10) || 5000,
   mongodbUri: process.env.MONGODB_URI,
   nodeEnv: process.env.NODE_ENV || 'development',
-  corsOrigin: process.env.CORS_ORIGIN || '*',
+  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   isProduction: process.env.NODE_ENV === 'production',
 });
 

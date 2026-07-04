@@ -1,10 +1,7 @@
-const path = require('path');
-const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
 const config = require('./config/env');
 const insightRoutes = require('./routes/insight.routes');
 const errorHandler = require('./middlewares/errorHandler');
@@ -12,24 +9,9 @@ const errorHandler = require('./middlewares/errorHandler');
 const app = express();
 
 app.use(helmet());
-const corsOptions = config.isProduction
-  ? { origin: config.corsOrigin === '*' ? true : config.corsOrigin.split(',').map(s => s.trim()) }
-  : { origin: config.corsOrigin };
-app.use(cors(corsOptions));
+app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
-
-if (!config.isProduction) {
-  app.use(morgan('dev'));
-}
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 500,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, message: 'Too many requests, please try again later' },
-});
-app.use('/api', limiter);
+app.use(morgan('dev'));
 
 app.get('/api/health', (_req, res) => {
   const mongoose = require('mongoose');
@@ -38,18 +20,6 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/insights', insightRoutes);
-
-if (config.isProduction) {
-  const frontendDist = path.resolve(__dirname, '../../frontend/dist');
-  if (fs.existsSync(frontendDist)) {
-    app.use(express.static(frontendDist));
-    app.get(/^\/(?!api).*/, (_req, res) => {
-      res.sendFile(path.join(frontendDist, 'index.html'));
-    });
-  } else {
-    console.warn(`Frontend dist not found at ${frontendDist}. API-only mode.`);
-  }
-}
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
